@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <title>💘 A Question for You</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Will You Go Out With Me?</title>
   <style>
     body {
       margin: 0;
@@ -14,10 +15,11 @@
       justify-content: center;
       flex-direction: column;
       text-align: center;
+      padding: 20px;
     }
 
     h1 {
-      font-size: 2em;
+      font-size: 1.8em;
       color: #333;
       margin-bottom: 40px;
     }
@@ -25,11 +27,13 @@
     .buttons {
       display: flex;
       gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     button {
       padding: 15px 25px;
-      font-size: 1.2em;
+      font-size: 1em;
       border: none;
       border-radius: 12px;
       cursor: pointer;
@@ -46,49 +50,195 @@
       color: white;
     }
 
-    .message {
-      margin-top: 40px;
-      font-size: 1.5em;
-      color: #d6336c;
+    .hidden {
       display: none;
     }
   </style>
 </head>
 <body>
-  <h1>Will you go out with me?</h1>
-  <div class="buttons">
-    <button class="yes" onclick="sayYes()">Yes ❤️</button>
-    <button class="no" onclick="sayNo(this)">No ❌</button>
-  </div>
-  <div class="message" id="message">Yay! I'm so happy 😄</div>
 
+  <h1 id="question">Loading...</h1>
+
+  <img id="finalGif" src="https://media1.tenor.com/m/VGWpu8FH82AAAAAC/happy-cat-yippee-cat.gif" 
+     class="hidden" 
+     style="max-width: 300px; margin-top: 20px; border-radius: 20px;" />
+
+  <img id="Welcome" src="https://media1.tenor.com/m/JCgXIK1kjyMAAAAd/viggo-viggo-mortensen.gif" 
+     class="hidden" 
+     style="max-width: 300px; margin-top: 20px; border-radius: 20px;" />
+
+  <img src="NerdCat.jpg" alt="NerdCat" id="nerd" 
+      class="hidden"
+      style="max-width: 300px; margin-top: 20px; border-radius: 20px;" />
+
+  <div class="buttons">
+    <button class="yes" onclick="handleYes()">Yes ❤️</button>
+    <button class="no" onclick="handleNo()">No ❌</button>
+  </div>
+
+  <div id="continueContainer" class="hidden">
+    <button id="continueBtn" style="margin-top: 30px; padding: 10px 20px; font-size: 1em; border-radius: 10px; background-color: #ffd1e6; border: none; cursor: pointer;">
+      Continue ➡️
+    </button>
+  </div>  
+
+  <div id="letterContainer" class="hidden" style="text-align:center;">
+    <img src="letter.png" alt="Love Letter" id="letterImage" style="width: 150px; cursor: pointer; transition: transform 0.3s;">
+
+    <div id="letterText" class="hidden" style="margin-top: 20px; font-size: 1.1em; max-width: 400px;">
+      <p>Dear you,<br><br>
+      I’ve had this on my mind for a while now…<br>
+      You make me smile more than anyone else ever has. My heart races every time I think of you.<br><br>
+      So here’s my real question… 💌</p>
+      <button onclick="revealDatingQuestion()" style="margin-top: 20px; padding: 10px 20px; font-size: 1em; border-radius: 10px; background-color: #ffd1e6; border: none; cursor: pointer;">
+        Continue ➡️
+      </button>
+    </div>
+  </div>
+  
   <script>
-    function sendResponse(answer) {
-      fetch("https://sheetdb.io/api/v1/4glmw0tzh0ezt", {
-        method: "POST",
-        body: JSON.stringify([{
-          answer: answer,
-          timestamp: new Date().toISOString()
-        }]),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }).catch((err) => {
-        console.error("Error sending response:", err);
-      });
-    }
+    const questions = [
+      "Look who made it here... My queen...",
+      "A couple of questions I have for you :3",
+      "Can we have unlimited cuddles?",
+      "Will you carry me in Overwatch?",
+      "Will you match my freak, but also pamper each other and call cute names? :3",
+      "💌 Click the letter to open it...",
+      "How about we become an official and exclusive couple and start dating?",
+      "Can I tell my friends and my parents about us? 🥺",
+      "MY QUEEN IS NOW OFFICIALY ONLY MINE I AM TELLING THE WORLLDDDDDD"
+    ];
+
+    const gifs = [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "https://tenor.com/view/happy-happy-happy-happy-happy-cat-happy-dancing-cat-gif-716006509349864265"
+    ];
+
   
-    function sayYes() {
-      document.getElementById('message').style.display = 'block';
-      sendResponse("Yes");
-    }
+    let currentStep = 0;
+    const SHEETDB_URL = "https://sheetdb.io/api/v1/4glmw0tzh0ezt"; // Replace with your actual SheetDB URL
   
-    function sayNo(button) {
-      const offsetX = (Math.random() - 0.5) * 200;
-      const offsetY = (Math.random() - 0.5) * 200;
-      button.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-      sendResponse("No");
+    function logAnswer(answer) {
+      if (currentStep < questions.length - 1) {
+        fetch(SHEETDB_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify([
+            {
+              question: questions[currentStep],
+              answer: answer,
+              timestamp: new Date().toISOString()
+            }
+          ])
+        }).catch((err) => console.error("SheetDB error:", err));
+      }
     }
-  </script>  
+    function revealDatingQuestion() {
+      currentStep++;
+      updateQuestion();
+    }
+
+    function updateQuestion() {
+      const q = document.getElementById("question");
+      const buttons = document.querySelector(".buttons");
+      const yesBtn = document.querySelector(".yes");
+      const noBtn = document.querySelector(".no");
+      const continueContainer = document.getElementById("continueContainer");
+      const continueBtn = document.getElementById("continueBtn");
+      const letterContainer = document.getElementById("letterContainer");
+      const letterImage = document.getElementById("letterImage");
+      const nerd = document.getElementById("nerd");
+      const letterText = document.getElementById("letterText");
+      const finalGif = document.getElementById("finalGif");
+      const Welcome = document.getElementById("Welcome");
+
+      q.textContent = questions[currentStep];
+
+      // Reset styles and visibility
+      buttons.classList.remove("hidden");
+      continueContainer.classList.add("hidden");
+      yesBtn.classList.remove("hidden");
+      yesBtn.style.display = "inline-block";
+      yesBtn.style.opacity = "1";
+      yesBtn.style.transform = "scale(1)";
+      noBtn.classList.remove("hidden");
+      noBtn.style.transform = "translate(0, 0)";
+      letterContainer.classList.add("hidden");
+      letterText.classList.add("hidden");
+      nerd.classList.add("hidden");
+
+      // Step 0 & 1: Continue only
+      if (currentStep === 0) {
+        buttons.classList.add("hidden");
+        continueContainer.classList.remove("hidden");
+        Welcome.classList.remove("hidden");
+        continueBtn.onclick = () => {
+          currentStep++;
+          updateQuestion();
+        };
+        return;
+      } else {
+        Welcome.classList.add("hidden"); // 👈 Hide if not final slide
+      }
+
+      if (currentStep === 1) {
+        buttons.classList.add("hidden");
+        continueContainer.classList.remove("hidden");
+        nerd.classList.remove("hidden"); // Show the nerd image
+        continueBtn.onclick = () => {
+          currentStep++;
+          updateQuestion();
+        };
+        return;
+      }
+
+      if (currentStep === 5) {
+        buttons.classList.add("hidden");            // Hide Yes/No buttons
+        letterContainer.classList.remove("hidden"); // Show letter section
+        letterImage.onclick = () => {
+          letterImage.style.transform = "scale(1.1)";   // Optional animation
+          letterText.classList.remove("hidden");       // Reveal message + Continue
+        };
+        return;
+      }
+
+      // Final slide: no buttons
+      if (currentStep >= questions.length - 1) {
+        buttons.classList.add("hidden");
+        continueContainer.classList.add("hidden");
+        finalGif.classList.remove("hidden"); // 👈 Show the happy cat gif
+        return;
+      } else {
+        finalGif.classList.add("hidden"); // 👈 Hide if not final slide
+      }
+
+
+      yesBtn.onclick = () => {
+        logAnswer("Yes");
+        currentStep++;
+        updateQuestion();
+      };
+
+      // NO button behavior
+      noBtn.onclick = () => {
+        const offsetX = (Math.random() - 0.5) * 250;
+        const offsetY = (Math.random() - 0.5) * 250;
+        noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        logAnswer("No");
+      };
+    }
+
+    updateQuestion();
+  </script>
 </body>
 </html>
