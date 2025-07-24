@@ -53,6 +53,12 @@
     .hidden {
       display: none;
     }
+
+    .maybe {
+      background-color: #ffc107;
+      color: white;
+    }
+
   </style>
 </head>
 <body>
@@ -74,6 +80,7 @@
   <div class="buttons">
     <button class="yes" onclick="handleYes()">Yes ❤️</button>
     <button class="no" onclick="handleNo()">No ❌</button>
+    <button class="maybe hidden" id="maybeBtn">I need a little bit more time ⏳</button>
   </div>
 
   <div id="continueContainer" class="hidden">
@@ -86,10 +93,14 @@
     <img src="letter.png" alt="Love Letter" id="letterImage" style="width: 150px; cursor: pointer; transition: transform 0.3s;">
 
     <div id="letterText" class="hidden" style="margin-top: 20px; font-size: 1.1em; max-width: 400px;">
-      <p>Dear you,<br><br>
-      I’ve had this on my mind for a while now…<br>
-      You make me smile more than anyone else ever has. My heart races every time I think of you.<br><br>
-      So here’s my real question… 💌</p>
+      <p>Hello again Jasmine,<br><br>
+      Ever since I wrote you for the first time, I knew there was something in you<br>
+      Something special. Something that I've found attractive ever since I saw you<br>
+      Even though we barely talked on voice, I can't keep you out of my mind. I can't keep thinking about you and about us.<br>
+      Every time you text me I smile and my day gets better.<br>
+      You calling me cute names, makes me feel special and cared for.<br>
+      I don't want to ever lose you, just keep you close and never let go...<br><br>
+      Here's my little proposal...</p>
       <button onclick="revealDatingQuestion()" style="margin-top: 20px; padding: 10px 20px; font-size: 1em; border-radius: 10px; background-color: #ffd1e6; border: none; cursor: pointer;">
         Continue ➡️
       </button>
@@ -125,6 +136,23 @@
   
     let currentStep = 0;
     const SHEETDB_URL = "https://sheetdb.io/api/v1/4glmw0tzh0ezt"; // Replace with your actual SheetDB URL
+
+    function showMaybeMessage() {
+      const q = document.getElementById("question");
+      const buttons = document.querySelector(".buttons");
+      const NerdImage = document.getElementById("NerdImage");
+      const letterContainer = document.getElementById("letterContainer");
+
+      q.textContent = "Of course! You know I'll be here! 💖 Take all the time you need.";
+
+      buttons.classList.add("hidden");
+      document.getElementById("continueContainer").classList.add("hidden");
+
+      // Hide any optional elements
+      if (NerdImage) NerdImage.classList.add("hidden");
+      if (letterContainer) letterContainer.classList.add("hidden");
+    }
+
   
     function logAnswer(answer) {
       if (currentStep < questions.length - 1) {
@@ -161,6 +189,7 @@
       const letterText = document.getElementById("letterText");
       const finalGif = document.getElementById("finalGif");
       const Welcome = document.getElementById("Welcome");
+      const maybeBtn = document.getElementById("maybeBtn");
 
       q.textContent = questions[currentStep];
 
@@ -176,6 +205,7 @@
       letterContainer.classList.add("hidden");
       letterText.classList.add("hidden");
       nerd.classList.add("hidden");
+      maybeBtn.classList.add("hidden"); 
 
       // Step 0 & 1: Continue only
       if (currentStep === 0) {
@@ -211,6 +241,34 @@
         };
         return;
       }
+
+      if (currentStep === 6) {
+        // Show all three buttons
+        buttons.classList.remove("hidden");
+        maybeBtn.classList.remove("hidden");
+
+        yesBtn.onclick = () => {
+          logAnswer("Yes");
+          currentStep++;
+          updateQuestion();
+        };
+
+        noBtn.onclick = () => {
+          const offsetX = (Math.random() - 0.5) * 250;
+          const offsetY = (Math.random() - 0.5) * 250;
+          noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+          logAnswer("No");
+        };
+
+        maybeBtn.onclick = () => {
+          logAnswer("Maybe / Needs time");
+          showMaybeMessage();
+        };
+
+        return;
+      }
+
+
 
       // Final slide: no buttons
       if (currentStep >= questions.length - 1) {
